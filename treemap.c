@@ -84,57 +84,73 @@ TreeNode * minimum(TreeNode * x){
 // Reemplace los datos (key,value) de node con los del nodo "minimum". Elimine el nodo minimum (para hacerlo puede usar la misma función removeNode).
 
 void removeNode(TreeMap * tree, TreeNode* node) {
-    if (tree == NULL || node == NULL) return; // si no hay nada dentro del arbol y el nodo se retorna
-    
-    //Nodo con dos hijos
-    if (node->left != NULL && node->right != NULL){
-        TreeNode* minNode = minimum(node->right);
-        
-        node->pair->key = minNode->pair->key;
-        node->pair->value = minNode->pair->value;
+     if (tree == NULL || node == NULL) return;
 
-        removeNode(tree, minNode);
-        
-        return;
-    }
+        // Caso 3: nodo con dos hijos
+        if (node->left != NULL && node->right != NULL) {
+            TreeNode* minNode = minimum(node->right);
 
-    // Nodo sin hijos y un hijo 
-    TreeNode *child;
-    
-    if (node->left != NULL){
-        child = node->left;
-    }
-    else child = node->right;
+            node->pair->key = minNode->pair->key;
+            node->pair->value = minNode->pair->value;
 
-    TreeNode *parent = node->parent;
-
-    
-    
-    if (child != NULL) child->parent = node->parent; // si que existe un hijo ahora este apunta al padre del que elimine 
-    if (node != tree->root && (parent == NULL || (parent->left != node && parent->right != node))) {
-        parent = NULL;
-        TreeNode *aux = tree->root;
-        
-        while (aux != NULL && aux != node){
-            parent = aux;
-            if (tree->lower_than(node->pair->key, aux->pair->key)){
-                aux = aux->left;
-            }
-            else aux = aux->right;
+            removeNode(tree, minNode);
+            return;
         }
-       
-    }
-    if (node->parent == NULL) tree->root = child; //si es que el nodo era raiz 
-        else if (node == node->parent->left) node->parent->left = child; // si es que hijo era izquierdo
-        else node->parent->right = child; // o si era hijo derecho
 
-        if (tree->current == node) tree->current = child;
+        // Caso 1 y 2: nodo sin hijos o con un hijo
+        TreeNode* child;
+
+        if (node->left != NULL) {
+            child = node->left;
+        } else {
+            child = node->right;
+        }
+
+        // Buscar el padre de forma segura
+        TreeNode* parent = node->parent;
+
+        if (node != tree->root && 
+            (parent == NULL || (parent->left != node && parent->right != node))) {
+
+            parent = NULL;
+            TreeNode* aux = tree->root;
+
+            while (aux != NULL && aux != node) {
+                parent = aux;
+
+                if (tree->lower_than(node->pair->key, aux->pair->key)) {
+                    aux = aux->left;
+                } else {
+                    aux = aux->right;
+                }
+            }
+        }
+
+        // Si el nodo tenía hijo, el hijo queda conectado al padre
+        if (child != NULL) {
+            child->parent = parent;
+        }
+
+        // Si estoy eliminando la raíz
+        if (node == tree->root) {
+            tree->root = child;
+        }
+        // Si el nodo era hijo izquierdo
+        else if (parent != NULL && parent->left == node) {
+            parent->left = child;
+        }
+        // Si el nodo era hijo derecho
+        else if (parent != NULL && parent->right == node) {
+            parent->right = child;
+        }
+
+        if (tree->current == node) {
+            tree->current = child;
+        }
 
         free(node->pair);
         free(node);
-
     }
-}
 
 void eraseTreeMap(TreeMap * tree, void* key){
     if (tree == NULL || tree->root == NULL) return;
