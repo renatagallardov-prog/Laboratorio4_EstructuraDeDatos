@@ -53,6 +53,16 @@ TreeMap * createTreeMap(int (*lower_than) (void* key1, void* key2)) {
 // Si no se encuentra la clave retorna NULL. Recuerde hacer que el current apunte al nodo encontrado.
 
 Pair * searchTreeMap(TreeMap * tree, void* key) {
+    if (tree == NULL || tree->root == NULL) return NULL;
+    TreeNode* aux = tree->root;
+    while (aux != NULL) {
+        if (is_equal(tree, aux->pair->key, key)){
+            tree->current = aux;
+            return aux->pair;
+        }
+        if (tree->lower_than(aux->pair->key,key)) aux = aux->right;
+        else aux = aux->left;
+    }
     return NULL;
 }
 
@@ -126,7 +136,6 @@ void removeNode(TreeMap * tree, TreeNode* node) {
     if (child != NULL) {
         child->parent = parent;
     }
-
     // Si estoy eliminando la raíz
     if (node == tree->root) {
         tree->root = child;
