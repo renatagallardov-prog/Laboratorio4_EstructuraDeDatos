@@ -102,16 +102,13 @@ void insertTreeMap(TreeMap * tree, void* key, void * value) {
         if (tree->lower_than(key, aux->pair->key)) aux = aux->left;
     
         else aux = aux->right;
-        
     }
 
     newNode->parent = parent;
 
-    if (tree->lower_than(key, parent->pair->key)) {
-        parent->left = newNode;
-    } else {
-        parent->right = newNode;
-    }
+    if (tree->lower_than(key, parent->pair->key)) parent->left = newNode;
+    else parent->right = newNode;
+    
 
     tree->current = newNode;
 }
@@ -138,7 +135,6 @@ TreeNode * minimum(TreeNode * x){
 
 void removeNode(TreeMap * tree, TreeNode* node) {
  if (tree == NULL || node == NULL) return;
-    // Caso 3: nodo con dos hijos
     if (node->left != NULL && node->right != NULL) {
         TreeNode* minNode = minimum(node->right);
         node->pair->key = minNode->pair->key;
@@ -148,7 +144,6 @@ void removeNode(TreeMap * tree, TreeNode* node) {
         return;
     }
 
-    // Caso 1 y 2: nodo sin hijos o con un hijo
     TreeNode* child;
 
     if (node->left != NULL) {
@@ -156,7 +151,6 @@ void removeNode(TreeMap * tree, TreeNode* node) {
     } else {
         child = node->right;
     }
-    // Buscar el padre de forma segura
     TreeNode* parent = node->parent;
     if (node != tree->root && 
         (parent == NULL || (parent->left != node && parent->right != node))) {
@@ -175,19 +169,15 @@ void removeNode(TreeMap * tree, TreeNode* node) {
         }
     }
 
-    // Si el nodo tenía hijo, el hijo queda conectado al padre
     if (child != NULL) {
         child->parent = parent;
     }
-    // Si estoy eliminando la raíz
     if (node == tree->root) {
         tree->root = child;
     }
-    // Si el nodo era hijo izquierdo
     else if (parent != NULL && parent->left == node) {
         parent->left = child;
     }
-    // Si el nodo era hijo derecho
     else if (parent != NULL && parent->right == node) {
         parent->right = child;
     }
@@ -214,11 +204,29 @@ void eraseTreeMap(TreeMap * tree, void* key){
 // Recuerde actualizar este puntero.
 
 Pair * firstTreeMap(TreeMap * tree) {
-    return NULL;
+    if (tree == NULL || tree->root == NULL) return NULL;
+
+    tree->current = minimum(tree->root);
+    return tree->current->pair;
 }
 
 Pair * nextTreeMap(TreeMap * tree) {
-    return NULL;
+    if (tree == NULL || tree->current == NULL) return NULL;
+    TreeNode *aux = tree->current;
+
+    if (aux->right != NULL){
+        tree->current = minimum(aux->right);
+        return tree->current->pair;
+    }
+    TreeNode *parent = aux->parent;
+    while (parent != NULL && aux == parent->right){
+        aux = parent;
+        parent = parent->parent;
+    }
+    tree->current = parent;
+    if (parent == NULL) return NULL;
+
+    return parent->pair;
 }
 
 // 7. La función Pair* upperBound(TreeMap* tree, void* key) retorna el Pair con clave igual a key. 
